@@ -34,11 +34,11 @@ const template = {
     }
   },
   groups: {
-    "8AAED7CC-46CE-427F-BE00-36E53E94C6AF": {
-        "sort": 1,
-        "identifier": "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
-        "name": "Regular"
-    }
+    //"8AAED7CC-46CE-427F-BE00-36E53E94C6AF": {
+    //    "sort": 1,
+    //    "identifier": "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
+    //    "name": "Regular"
+    //}
   },
   sets: {},
   items: {}
@@ -48,7 +48,7 @@ template.sets[packageId] = {
   name: name,
   sort: 1,
   licence: "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8",
-  parent: "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
+  //parent: "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
   identifier: packageId
 };
 
