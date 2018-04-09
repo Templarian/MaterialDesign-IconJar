@@ -7,11 +7,10 @@
 const fs = require('fs');
 const archiver = require('archiver');
 
-const buildFolder = "build";
 const outputFile = "mdi.iconjar";
 const output = fs.createWriteStream(outputFile);
 const archive = archiver('zip');
-const outputMeta = fs.createWriteStream(`${buildFolder}/META`);
+const outputMeta = fs.createWriteStream(`meta.zip`);
 const archiveMeta = archiver('zip');
 const packageId = "38EF63D0-4744-11E4-B3CF-842B2B6CFE1B";
 const svgPackageFolder = "./node_modules/@mdi/svg";
@@ -55,22 +54,26 @@ function getMetaJson() {
 }
 
 function removeDirectory(path) {
-  if (!path) { throw "omg, don't do that!"; }
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(function(file, index){
-      var curPath = path + "/" + file;
-      if (fs.lstatSync(curPath).isDirectory()) { // recurse
-        deleteFolderRecursive(curPath);
-      } else { // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
+  try {
+    if (!path) { throw "omg, don't do that!"; }
+    if (fs.existsSync(path)) {
+      fs.readdirSync(path).forEach(function(file, index){
+        var curPath = path + "/" + file;
+        if (fs.lstatSync(curPath).isDirectory()) { // recurse
+          removeDirectory(curPath);
+        } else { // delete file
+          fs.unlinkSync(curPath);
+        }
+      });
+      fs.rmdirSync(path);
+    }
+  } catch(e) {}
 }
 
 function makeDirectory(folder) {
-  fs.mkdirSync(folder);
+  try {
+    fs.mkdirSync(folder);
+  } catch(e) {} // Don't care if it already exists 
 }
 
 function getSvgFiles() {
@@ -96,8 +99,6 @@ function build() {
   const version = getVersion();
   const files = getSvgFiles();
   const icons = getMetaJson();
-  removeDirectory('build')
-  makeDirectory('build');
   icons.forEach((icon) => {
     template.items[icon.id] = {
       width: 24,
@@ -112,26 +113,32 @@ function build() {
       unicode: icon.codepoint
     }
   });
-  writeFile('build/META~', JSON.stringify(template));
-  archiveMeta.pipe(outputMeta);
-  archiveMeta.bulk([
-      { expand: true, cwd: 'source', src: ["build/META~"], dest: 'source'}
-  ]);
-  archiveMeta.finalize();
-  outputMeta.on('close', function () {
-      console.log(archiveMeta.pointer() + ' total bytes');
-      console.log('The "META~" json file has been zipped into "META".');
+  output.on('finish', function () {
+    console.log(`> [${archive.pointer()}] "${outputFile}" zip created.`);
+    // remove meta.zip
+    fs.unlinkSync(`meta.zip`);
+    console.log(`> "meta.zip" zip removed.`);
+    console.log(`Successfully built v${version}!`);
   });
-  console.log(`Successfully built v${version}!`);
+  outputMeta.on('finish', function () {
+    console.log(`> [${archiveMeta.pointer()}] "meta.zip" zip created.`);
+    archive.pipe(output);
+    archive.file(`meta.zip`, { name: 'META' });
+    archive.directory(`${svgPackageFolder}/svg`, 'icons');
+    archive.finalize();
+  });
+  archiveMeta.pipe(outputMeta);
+  archiveMeta.append(JSON.stringify(template), { name: 'META~' });
+  archiveMeta.finalize();
 }
 
 // meta~ => meta
-archiveMeta.on('error', function(err){
+archiveMeta.on('error', (err) => {
   throw err;
 });
 
 // build -> outputFile
-archive.on('error', function(err){
+archive.on('error', (err) => {
   throw err;
 });
 
