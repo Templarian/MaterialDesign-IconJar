@@ -7,7 +7,8 @@
 const fs = require('fs');
 const archiver = require('archiver');
 
-const outputFile = "mdi.iconjar.zip";
+const name = "Material Design Icons";
+const outputFile = `${name.toLowerCase().replace(/ /g, "-")}.iconjar.zip`;
 const output = fs.createWriteStream(outputFile);
 const archive = archiver('zip');
 const outputMeta = fs.createWriteStream(`meta.zip`);
@@ -15,7 +16,6 @@ const archiveMeta = archiver('zip');
 const packageId = "38EF63D0-4744-11E4-B3CF-842B2B6CFE1B";
 const svgPackageFolder = "./node_modules/@mdi/svg";
 const encoding = "utf8";
-const name = "Material Design Icons";
 const template = {
   meta: {
     version: 2,
@@ -82,7 +82,7 @@ function build() {
       file: `${icon.name}.svg`,
       type: 0, // SVG
       name: icon.name,
-      tags: [...icon.tags, ...icon.aliases].join(',').replace(" / ", "-").replace(" ", "-")
+      tags: [...icon.tags, ...icon.aliases].join(',').replace(/ \/ /g, "-").replace(/ /g, "-")
     }
   });
   output.on('finish', function () {
@@ -95,8 +95,8 @@ function build() {
   outputMeta.on('finish', function () {
     console.log(`> [${archiveMeta.pointer()}] "meta.zip" zip created.`);
     archive.pipe(output);
-    archive.file(`meta.zip`, { name: 'mdi.iconjar/META' });
-    archive.directory(`${svgPackageFolder}/svg`, 'mdi.iconjar/icons');
+    archive.file(`meta.zip`, { name: `${name.toLowerCase().replace(/ /g, "-")}.iconjar/META` });
+    archive.directory(`${svgPackageFolder}/svg`, `${name.toLowerCase().replace(/ /g, "-")}.iconjar/icons`);
     archive.finalize();
   });
   archiveMeta.pipe(outputMeta);
