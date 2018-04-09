@@ -33,13 +33,21 @@ const template = {
       "name": "MIT"
     }
   },
+  "groups": {
+    "8AAED7CC-46CE-427F-BE00-36E53E94C6AF": {
+        "sort": 1,
+        "identifier": "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
+        "name": "Regular"
+    }
+  },
   sets: {},
   items: {}
 };
 template.sets[packageId] = {
-  date: "2016-01-30 13:35:44",
+  date: "2018-04-02 13:35:45",
   name: name,
   sort: 1,
+  parent: "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
   identifier: packageId
 };
 
@@ -109,8 +117,7 @@ function build() {
       file: `${icon.name}.svg`,
       type: 0, // SVG
       name: icon.name,
-      tags: [...icon.tags, ...icon.aliases].join(','),
-      unicode: icon.codepoint
+      tags: [...icon.tags, ...icon.aliases].join(',')
     }
   });
   output.on('finish', function () {
