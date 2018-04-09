@@ -82,7 +82,7 @@ function build() {
       file: `${icon.name}.svg`,
       type: 0, // SVG
       name: icon.name,
-      tags: [...icon.tags, ...icon.aliases].join(',')
+      tags: [...icon.tags, ...icon.aliases].join(',').replace(" / ", "-").replace(" ", "-")
     }
   });
   output.on('finish', function () {
