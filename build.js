@@ -33,7 +33,7 @@ const template = {
       "name": "MIT"
     }
   },
-  "groups": {
+  groups: {
     "8AAED7CC-46CE-427F-BE00-36E53E94C6AF": {
         "sort": 1,
         "identifier": "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
@@ -47,6 +47,7 @@ template.sets[packageId] = {
   date: "2018-04-02 13:35:45",
   name: name,
   sort: 1,
+  licence: "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8",
   parent: "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
   identifier: packageId
 };
@@ -61,46 +62,10 @@ function getMetaJson() {
   return JSON.parse(contents);
 }
 
-function removeDirectory(path) {
-  try {
-    if (!path) { throw "omg, don't do that!"; }
-    if (fs.existsSync(path)) {
-      fs.readdirSync(path).forEach(function(file, index){
-        var curPath = path + "/" + file;
-        if (fs.lstatSync(curPath).isDirectory()) { // recurse
-          removeDirectory(curPath);
-        } else { // delete file
-          fs.unlinkSync(curPath);
-        }
-      });
-      fs.rmdirSync(path);
-    }
-  } catch(e) {}
-}
-
-function makeDirectory(folder) {
-  try {
-    fs.mkdirSync(folder);
-  } catch(e) {} // Don't care if it already exists 
-}
-
 function getSvgFiles() {
   return fs.readdirSync(`${svgPackageFolder}/svg`).map(file => {
     return `${svgPackageFolder}/svg/${file}`;
   })
-}
-
-function getNameWithPaths(files) {
-  // { name: "icon-name", path: "M..." }
-  return files.map(file => {
-    const name = file.match(/([^\/]+)\.svg$/)[1];
-    const path = fs.readFileSync(file, { encoding }).match(/d="([^"]+)"/)[1];
-    return { name, path };
-  })
-}
-
-function writeFile(name, data) {
-  fs.writeFileSync(`./${name}`, data, { encoding });
 }
 
 function build() {
