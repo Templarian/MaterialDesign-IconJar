@@ -7,7 +7,7 @@
 const fs = require('fs');
 const archiver = require('archiver');
 
-const outputFile = "mdi.iconjar";
+const outputFile = "mdi.iconjar.zip";
 const output = fs.createWriteStream(outputFile);
 const archive = archiver('zip');
 const outputMeta = fs.createWriteStream(`meta.zip`);
@@ -95,8 +95,8 @@ function build() {
   outputMeta.on('finish', function () {
     console.log(`> [${archiveMeta.pointer()}] "meta.zip" zip created.`);
     archive.pipe(output);
-    archive.file(`meta.zip`, { name: 'META' });
-    archive.directory(`${svgPackageFolder}/svg`, 'icons');
+    archive.file(`meta.zip`, { name: 'mdi.iconjar/META' });
+    archive.directory(`${svgPackageFolder}/svg`, 'mdi.iconjar/icons');
     archive.finalize();
   });
   archiveMeta.pipe(outputMeta);
