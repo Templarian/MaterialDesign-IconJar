@@ -5,14 +5,14 @@
 // - zip > meta       = Zip of meta~
 //  - meta~           = JSON
 const fs = require('fs');
+const zlib = require('zlib');
 const archiver = require('archiver');
+const gzip = zlib.createGzip();
 
 const name = "Material Design Icons";
 const outputFile = `${name.toLowerCase().replace(/ /g, "-")}.iconjar.zip`;
 const output = fs.createWriteStream(outputFile);
 const archive = archiver('zip');
-const outputMeta = fs.createWriteStream(`meta.zip`);
-const archiveMeta = archiver('zip');
 const packageId = "38EF63D0-4744-11E4-B3CF-842B2B6CFE1B";
 const svgPackageFolder = "./node_modules/@mdi/svg";
 const encoding = "utf8";
@@ -62,15 +62,8 @@ function getMetaJson() {
   return JSON.parse(contents);
 }
 
-function getSvgFiles() {
-  return fs.readdirSync(`${svgPackageFolder}/svg`).map(file => {
-    return `${svgPackageFolder}/svg/${file}`;
-  })
-}
-
 function build() {
   const version = getVersion();
-  const files = getSvgFiles();
   const icons = getMetaJson();
   icons.forEach((icon) => {
     template.items[icon.id] = {
@@ -87,27 +80,17 @@ function build() {
   });
   output.on('finish', function () {
     console.log(`> [${archive.pointer()}] "${outputFile}" zip created.`);
-    // remove meta.zip
-    fs.unlinkSync(`meta.zip`);
-    console.log(`> "meta.zip" zip removed.`);
     console.log(`Successfully built v${version}!`);
   });
-  outputMeta.on('finish', function () {
-    console.log(`> [${archiveMeta.pointer()}] "meta.zip" zip created.`);
-    archive.pipe(output);
-    archive.file(`meta.zip`, { name: `${name.toLowerCase().replace(/ /g, "-")}.iconjar/META` });
+  console.log(`> "META" gzip created.`);
+  archive.pipe(output);
+  // Meta
+  zlib.gzip(JSON.stringify(template), (err, data) => {
+    archive.append(data, { name: `${name.toLowerCase().replace(/ /g, "-")}.iconjar/META` });
     archive.directory(`${svgPackageFolder}/svg`, `${name.toLowerCase().replace(/ /g, "-")}.iconjar/icons`);
     archive.finalize();
   });
-  archiveMeta.pipe(outputMeta);
-  archiveMeta.append(JSON.stringify(template), { name: 'META~' });
-  archiveMeta.finalize();
 }
-
-// meta~ => meta
-archiveMeta.on('error', (err) => {
-  throw err;
-});
 
 // build -> outputFile
 archive.on('error', (err) => {
