@@ -1,61 +1,51 @@
-// Build mdi.iconjar  = v2
-// zip >
-// - icons            = Folder
-//  - account.svg     = Optimized SVG
-// - zip > meta       = Zip of meta~
-//  - meta~           = JSON
+// material-design-icons.iconjar.zip v2 
+// - icons          = Folder
+//  - account.svg   = Optimized SVG
+// - META           = gzip of meta JSON
 const fs = require('fs');
 const zlib = require('zlib');
 const archiver = require('archiver');
-const gzip = zlib.createGzip();
 
 const name = "Material Design Icons";
+const encoding = "utf8";
+const svgPackageFolder = "./node_modules/@mdi/svg";
+const version = (() => {
+  const file = fs.readFileSync(`${svgPackageFolder}/package.json`, { encoding });
+  return JSON.parse(file).version;
+})();
+const date = (new Date().toISOString()).replace(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}).*/, "$1 $2");
 const outputFile = `${name.toLowerCase().replace(/ /g, "-")}.iconjar.zip`;
 const output = fs.createWriteStream(outputFile);
 const archive = archiver('zip');
 const packageId = "38EF63D0-4744-11E4-B3CF-842B2B6CFE1B";
-const svgPackageFolder = "./node_modules/@mdi/svg";
-const encoding = "utf8";
 const template = {
   meta: {
     version: 2,
     build: {
-      version: "2243",
-      build: "2.2.43"
+      version: version.replace(/\./g, ""),
+      build: version
     },
-    date: "2018-04-01 13:35:57"
+    date: date
   },
   licences: {
     "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8": {
-      "url": "https://github.com/Templarian/MaterialDesign/blob/master/LICENSE",
-      "text": "Please read the license url for more details.",
-      "identifier": "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8",
-      "name": "MIT"
+      url: "https://github.com/Templarian/MaterialDesign/blob/master/LICENSE",
+      text: "Please read the license url for more details.",
+      identifier: "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8",
+      name: "MIT"
     }
   },
-  groups: {
-    //"8AAED7CC-46CE-427F-BE00-36E53E94C6AF": {
-    //    "sort": 1,
-    //    "identifier": "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
-    //    "name": "Regular"
-    //}
-  },
+  groups: {},
   sets: {},
   items: {}
 };
 template.sets[packageId] = {
-  date: "2018-04-02 13:35:45",
+  date: date,
   name: name,
   sort: 1,
   licence: "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8",
-  //parent: "8AAED7CC-46CE-427F-BE00-36E53E94C6AF",
   identifier: packageId
 };
-
-function getVersion() {
-  const file = fs.readFileSync(`${svgPackageFolder}/package.json`, { encoding });
-  return JSON.parse(file).version;
-}
 
 function getMetaJson() {
   const contents = fs.readFileSync(`${svgPackageFolder}/meta.json`, { encoding });
@@ -63,14 +53,13 @@ function getMetaJson() {
 }
 
 function build() {
-  const version = getVersion();
   const icons = getMetaJson();
   icons.forEach((icon) => {
     template.items[icon.id] = {
       width: 24,
       height: 24,
       parent: packageId,
-      date: "2018-04-02 13:35:45",
+      date: date,
       identifier: icon.id,
       file: `${icon.name}.svg`,
       type: 0, // SVG
