@@ -42,6 +42,8 @@ const template = {
 template.sets[packageId] = {
   date: date,
   name: name,
+  url: "https://materialdesignicons.com",
+  description: "https://materialdesignicons.com Maintained by Austin Andrews (@Templarian)",
   sort: 1,
   licence: "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8",
   identifier: packageId
