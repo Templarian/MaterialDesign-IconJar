@@ -5,6 +5,7 @@
 const fs = require('fs');
 const zlib = require('zlib');
 const archiver = require('archiver');
+const uuid = require('uuid');
 
 const name = "Material Design Icons";
 const encoding = "utf8";
@@ -39,7 +40,7 @@ const template = {
   sets: {},
   items: {}
 };
-template.sets[packageId] = {
+template.groups[name] = {
   date: date,
   name: name,
   url: "https://materialdesignicons.com",
@@ -47,6 +48,16 @@ template.sets[packageId] = {
   sort: 1,
   licence: "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8",
   identifier: packageId
+};
+template.sets["_ALL"] = {
+  date: date,
+  name: "_ALL",
+  url: "https://materialdesignicons.com",
+  description: "https://materialdesignicons.com Maintained by Austin Andrews (@Templarian)",
+  sort: 1,
+  licence: "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8",
+  identifier: uuid.v4(),
+  parent: template.groups[name].identifier
 };
 
 function getMetaJson() {
@@ -57,10 +68,36 @@ function getMetaJson() {
 function build() {
   const icons = getMetaJson();
   icons.forEach((icon) => {
+    icon.tags.forEach((tag) => {
+      if (!template.sets[tag]) {
+        template.sets[tag] = {
+          date: date,
+          name: tag,
+          url: "https://materialdesignicons.com",
+          description: "https://materialdesignicons.com Maintained by Austin Andrews (@Templarian)",
+          sort: 1,
+          licence: "69A6D789-4E3C-4379-86CC-4D83B1C3F8D8",
+          identifier: uuid.v4(),
+          parent: template.groups[name].identifier
+        };
+      }
+      var iconuuid = uuid.v4();
+      template.items[iconuuid] = {
+        width: 24,
+        height: 24,
+        parent: template.sets[tag].identifier,
+        date: date,
+        identifier: iconuuid,
+        file: `${icon.name}.svg`,
+        type: 0, // SVG
+        name: icon.name,
+        tags: [...icon.tags, ...icon.aliases].join(',').replace(/ \/ /g, "-").replace(/ /g, "-")
+      }
+    })
     template.items[icon.id] = {
       width: 24,
       height: 24,
-      parent: packageId,
+      parent: template.sets["_ALL"].identifier,
       date: date,
       identifier: icon.id,
       file: `${icon.name}.svg`,
