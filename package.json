@@ -23,7 +23,10 @@
   },
   "homepage": "https://materialdesignicons.com",
   "devDependencies": {
-    "@mdi/svg": "^2.2.43",
-    "archiver": "^2.1.1"
+    "@mdi/svg": "^7.0.96"
+  },
+  "dependencies": {
+    "archiver": "^5.3.1",
+    "uuid": "^9.0.0"
   }
 }
